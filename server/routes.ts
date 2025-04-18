@@ -7,7 +7,7 @@ import axios from "axios";
 
 // GitHub API URL constants
 const GITHUB_API_BASE = "https://api.github.com";
-const DEFAULT_REPO = "Lucas-Song-Dev/Personal-Website";
+const DEFAULT_REPO = "Lucas-Song-Dev/RedditPainpoint";
 const AVAILABLE_REPOS = [
   "Lucas-Song-Dev/Personal-Website",
   "Lucas-Song-Dev/RedditPainpoint"
