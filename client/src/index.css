@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* GitHub themed colors */
+  :root {
+    --color-github-blue: #0969da;
+    --color-github-success: #238636;
+    --color-github-failure: #cf222e;
+    --color-github-pending: #bf8700;
+    --color-github-neutral: #57606a;
+    --color-github-darkgray: #24292f;
+    --color-github-lightgray: #f6f8fa;
+    --color-github-border: #d0d7de;
+  }
+}
+
+/* Custom GitHub theme utility classes */
+.text-github-blue {
+  color: var(--color-github-blue);
+}
+
+.text-github-success {
+  color: var(--color-github-success);
+}
+
+.text-github-failure {
+  color: var(--color-github-failure);
+}
+
+.text-github-pending {
+  color: var(--color-github-pending);
+}
+
+.text-github-neutral {
+  color: var(--color-github-neutral);
+}
+
+.text-github-darkgray {
+  color: var(--color-github-darkgray);
+}
+
+.bg-github-blue {
+  background-color: var(--color-github-blue);
+}
+
+.bg-github-success {
+  background-color: var(--color-github-success);
+}
+
+.bg-github-failure {
+  background-color: var(--color-github-failure);
+}
+
+.bg-github-pending {
+  background-color: var(--color-github-pending);
+}
+
+.bg-github-lightgray {
+  background-color: var(--color-github-lightgray);
+}
+
+.border-github-border {
+  border-color: var(--color-github-border);
+}
+
+/* Auto-refresh animation */
+@keyframes countdown-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.countdown-pulse {
+  animation: countdown-pulse 1s infinite;
+}
