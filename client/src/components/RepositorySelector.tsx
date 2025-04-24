@@ -48,9 +48,9 @@ export default function RepositorySelector({
   // Determine repo type
   const getRepoType = (repoName: string) => {
     if (repoName.includes("Personal-Website")) {
-      return "Website";
+      return "Next.js React.js";
     } else if (repoName.includes("RedditPainpoint")) {
-      return "Python Flask React Vite";
+      return "Python Flask React.js Vite";
     } else {
       return "Repository";
     }
