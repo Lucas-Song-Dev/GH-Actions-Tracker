@@ -5,6 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WorkflowRun, WorkflowRunsResponse } from "@/lib/github";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface WorkflowListProps {
   isRefreshing: boolean;
@@ -12,72 +19,88 @@ interface WorkflowListProps {
   onSelectRun?: (runId: number) => void;
 }
 
-export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-Dev/Personal-Website", onSelectRun }: WorkflowListProps) {
+export default function WorkflowList({
+  isRefreshing,
+  repository = "Lucas-Song-Dev/Personal-Website",
+  onSelectRun,
+}: WorkflowListProps) {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [workflowTypeFilter, setWorkflowTypeFilter] = useState<string>("all");
-  
+  const [sortBy, setSortBy] = useState<string>("recent");
+
   // Fetch workflow runs
   const { data, isLoading, error } = useQuery<WorkflowRunsResponse>({
     queryKey: [
-      `/api/workflow-runs?repo=${repository}&page=${page}&per_page=10${statusFilter !== 'all' ? `&status=${statusFilter}` : ''}`,
+      `/api/workflow-runs?repo=${repository}&page=${page}&per_page=10${
+        statusFilter !== "all" ? `&status=${statusFilter}` : ""
+      }&sort=${sortBy}`,
       isRefreshing,
       repository,
-      workflowTypeFilter
+      workflowTypeFilter,
+      sortBy,
     ],
   });
-  
+
   // Handle status filter change
   const handleStatusFilter = (status: string) => {
     setStatusFilter(status);
     setPage(1);
   };
-  
+
   // Handle workflow type filter change
   const handleWorkflowTypeFilter = (type: string) => {
     setWorkflowTypeFilter(type);
     setPage(1);
   };
-  
+
+  // Handle sort change
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setPage(1);
+  };
+
   // Handle pagination
   const handlePrevPage = () => {
     if (page > 1) {
       setPage(page - 1);
     }
   };
-  
+
   const handleNextPage = () => {
     if (data?.pagination.hasMore) {
       setPage(page + 1);
     }
   };
-  
+
   // Rendering skeleton during loading
   const renderSkeleton = () => {
-    return Array(4).fill(0).map((_, index) => (
-      <div key={index} className="p-4 border-b border-github-border">
-        <div className="flex items-start gap-3">
-          <Skeleton className="h-6 w-6 rounded-full" />
-          <div className="flex-1">
-            <Skeleton className="h-5 w-40 mb-2" />
-            <Skeleton className="h-4 w-64 mb-1" />
-            <div className="flex gap-2 mt-2">
-              <Skeleton className="h-3 w-32" />
-              <Skeleton className="h-3 w-24" />
+    return Array(4)
+      .fill(0)
+      .map((_, index) => (
+        <div key={index} className="p-4 border-b border-github-border">
+          <div className="flex items-start gap-3">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <div className="flex-1">
+              <Skeleton className="h-5 w-40 mb-2" />
+              <Skeleton className="h-4 w-64 mb-1" />
+              <div className="flex gap-2 mt-2">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-3 w-24" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    ));
+      ));
   };
-  
+
   return (
-    <div className="w-full lg:w-2/3">
+    <div className="w-full">
       <Card className="overflow-hidden">
         <div className="border-b border-github-border p-4">
           <h2 className="text-lg font-semibold">Recent Workflow Runs</h2>
         </div>
-        
+
         {/* Workflow Status Filters */}
         <div className="border-b border-github-border p-3 bg-github-lightgray flex flex-wrap gap-2">
           <Button
@@ -112,12 +135,25 @@ export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-De
           >
             Failed
           </Button>
+          <div className="ml-auto">
+            <Select value={sortBy} onValueChange={handleSortChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="duration">Longest Duration</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        
+
         {/* Workflow Type Filters - Only for RedditPainpoint repository */}
         {repository === "Lucas-Song-Dev/RedditPainpoint" && (
           <div className="border-b border-github-border p-3 bg-github-lightgray flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-github-neutral mr-2">Workflow Type:</span>
+            <span className="text-sm text-github-neutral mr-2">
+              Workflow Type:
+            </span>
             <Button
               variant={workflowTypeFilter === "all" ? "default" : "outline"}
               size="sm"
@@ -136,7 +172,9 @@ export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-De
               Python Tests
             </Button>
             <Button
-              variant={workflowTypeFilter === "frontend" ? "default" : "outline"}
+              variant={
+                workflowTypeFilter === "frontend" ? "default" : "outline"
+              }
               size="sm"
               onClick={() => handleWorkflowTypeFilter("frontend")}
               className="px-3 py-1 text-sm"
@@ -146,7 +184,7 @@ export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-De
             </Button>
           </div>
         )}
-        
+
         {/* Workflow List */}
         <div className="divide-y divide-github-border">
           {isLoading ? (
@@ -162,35 +200,54 @@ export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-De
             </div>
           ) : (
             data?.workflowRuns
-              .filter(run => {
+              .filter((run) => {
                 // Filter by workflow type if not "all" and repository is RedditPainpoint
-                if (repository === "Lucas-Song-Dev/RedditPainpoint" && workflowTypeFilter !== "all") {
-                  if (workflowTypeFilter === "python" && run.name !== "Python Tests") return false;
-                  if (workflowTypeFilter === "frontend" && run.name !== "Frontend Tests") return false;
+                if (
+                  repository === "Lucas-Song-Dev/RedditPainpoint" &&
+                  workflowTypeFilter !== "all"
+                ) {
+                  if (
+                    workflowTypeFilter === "python" &&
+                    run.name !== "Python Tests"
+                  )
+                    return false;
+                  if (
+                    workflowTypeFilter === "frontend" &&
+                    run.name !== "Frontend Tests"
+                  )
+                    return false;
                 }
                 return true;
               })
               .map((run: WorkflowRun) => (
-                <WorkflowItem 
-                  key={run.runId} 
-                  run={run} 
-                  onSelect={onSelectRun} 
+                <WorkflowItem
+                  key={run.runId}
+                  run={run}
+                  onSelect={onSelectRun}
                   isPythonTest={
-                    repository === "Lucas-Song-Dev/RedditPainpoint" && 
-                    (run.name === "Python Tests" || run.name === "Frontend Tests")
+                    repository === "Lucas-Song-Dev/RedditPainpoint" &&
+                    (run.name === "Python Tests" ||
+                      run.name === "Frontend Tests")
                   }
                 />
               ))
           )}
         </div>
-        
+
         {/* Pagination */}
         {!isLoading && data?.workflowRuns && data.workflowRuns.length > 0 && (
           <div className="p-4 border-t border-github-border flex justify-between items-center">
             <span className="text-sm text-github-neutral">
               Showing {(page - 1) * 10 + 1}-
-              {Math.min(page * 10, (page - 1) * 10 + (data?.workflowRuns.length || 0))} of{" "}
-              {data?.pagination.hasMore ? "many" : (page - 1) * 10 + (data?.workflowRuns.length || 0)} workflow runs
+              {Math.min(
+                page * 10,
+                (page - 1) * 10 + (data?.workflowRuns.length || 0)
+              )}{" "}
+              of{" "}
+              {data?.pagination.hasMore
+                ? "many"
+                : (page - 1) * 10 + (data?.workflowRuns.length || 0)}{" "}
+              workflow runs
             </span>
             <div className="flex gap-2">
               <Button
@@ -208,8 +265,8 @@ export default function WorkflowList({ isRefreshing, repository = "Lucas-Song-De
                 onClick={handleNextPage}
                 disabled={!data?.pagination.hasMore}
                 className={`px-3 py-1 text-sm rounded-md ${
-                  data?.pagination.hasMore 
-                    ? "bg-github-blue text-white hover:bg-opacity-90" 
+                  data?.pagination.hasMore
+                    ? "bg-github-blue text-white hover:bg-opacity-90"
                     : "border border-github-border text-github-neutral"
                 }`}
               >

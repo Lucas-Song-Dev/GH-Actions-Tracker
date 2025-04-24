@@ -25,7 +25,7 @@ export default function Home() {
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState<boolean>(false);
   const autoRefreshCountdownRef = useRef<number>(15);
   const [autoRefreshCountdown, setAutoRefreshCountdown] = useState<number>(15);
-  const [selectedRepo, setSelectedRepo] = useState<string>("Lucas-Song-Dev/Personal-Website");
+  const [selectedRepo, setSelectedRepo] = useState<string>("Lucas-Song-Dev/RedditPainpoint");
   const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
   const { toast } = useToast();
   

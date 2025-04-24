@@ -182,6 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string || "1");
       const perPage = parseInt(req.query.per_page as string || "10");
       const status = req.query.status as string || undefined;
+      const sort = req.query.sort as string || "recent";
       
       // Calculate offset for pagination
       const offset = (page - 1) * perPage;
@@ -245,6 +246,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (status === "failed") return run.conclusion === "failure";
           return true; // "all" or undefined
         });
+      }
+
+      // Apply sorting
+      if (sort === "duration") {
+        workflowRuns.sort((a, b) => {
+          const durationA = a.durationInSeconds || 0;
+          const durationB = b.durationInSeconds || 0;
+          return durationB - durationA; // Sort by longest duration first
+        });
+      } else {
+        // Default sort by most recent
+        workflowRuns.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
       
       res.json({ 
